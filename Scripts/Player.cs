@@ -6,7 +6,9 @@ using UnityEngine.UIElements;
 public class Player : MonoBehaviour
 {
     //Player Movment
+    public int lives;
     public float playerSpeed;
+    private GameManager gameManager;
     private float horizontalInput;
     private float verticalInput;
 
@@ -19,8 +21,9 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        //This function is called before the start of the game
-
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        lives = 3; // Set the initial number of lives
+        gameManager.UpdateLives(lives); 
     }
     
     void Update()
@@ -28,6 +31,29 @@ public class Player : MonoBehaviour
         //Call the function to read input
         Movement();
         Shooting();
+    }
+
+    public void LooseALife()
+    {
+        lives--;
+        gameManager.UpdateLives(lives);
+        if (lives <= 0)
+        {
+            //Game Over
+            Destroy(this.gameObject);
+        }
+    }
+    public void GainALife()
+    {
+        if (lives < 3)
+        {
+            lives++;
+            gameManager.UpdateLives(lives);
+        }
+        else
+        {
+            gameManager.AddScore(1000);
+        }
     }
 
     void Movement()
