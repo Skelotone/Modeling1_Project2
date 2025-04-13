@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -14,7 +15,11 @@ public class GameManager : MonoBehaviour
 
     public GameObject playerPrefab;
     public GameObject lifeItemPrefab;
+    public GameObject shieldItemPrefab;
     public GameObject scorePickUpPrefab;
+
+    public GameObject gameOverText;
+    public GameObject restartText;
 
     public GameObject enemyOnePrefab;
     public GameObject enemyTwoPrefab;
@@ -25,6 +30,8 @@ public class GameManager : MonoBehaviour
     
     private int score;
 
+    private bool gameOver;
+
     public float horizontalScreenLimit = 11.25f;
     public float MaxY = -1f;
     public float MinY = -7f;
@@ -32,8 +39,9 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         score = 0;
+        gameOver = false;
         Instantiate(playerPrefab, transform.position, Quaternion.identity);
-        InvokeRepeating("createLifeItem", 30f, 30f);
+        StartCoroutine(spawnPlayerItems());
         InvokeRepeating("createScorePickUp", 10f, 10f);
 
         InvokeRepeating("createEnemyOne", 1f, 3f);
@@ -44,7 +52,11 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        
+      if (gameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Time.timeScale = 1f;
+        }  
     }
 
     void createEnemyOne()
@@ -60,14 +72,7 @@ public class GameManager : MonoBehaviour
         Instantiate(enemyThreePrefab, new Vector3(Random.Range(-11f, 11f), 6f, 0), Quaternion.identity);
     }
 
-void createLifeItem()
-    {
-        float randomX = Random.Range(-horizontalScreenLimit, horizontalScreenLimit);
-        float randomY = Random.Range(MinY, MaxY);
-        Vector3 spawnPosition = new Vector3(randomX, randomY, 0);
 
-        Instantiate(lifeItemPrefab, spawnPosition, Quaternion.identity);
-    }
 void createScorePickUp()
     {
         float randomX = Random.Range(-horizontalScreenLimit, horizontalScreenLimit);
@@ -76,7 +81,33 @@ void createScorePickUp()
 
         Instantiate(scorePickUpPrefab, spawnPosition, Quaternion.identity);
     }
+    IEnumerator spawnPlayerItems()
+    {
+        while (true)
+        {
+            // Wait for 20 seconds before spawning the next item
+            yield return new WaitForSeconds(20f);
 
+            // Generate a random position within the screen limits
+            float randomX = Random.Range(-horizontalScreenLimit, horizontalScreenLimit);
+            float randomY = Random.Range(MinY, MaxY);
+            Vector3 spawnPosition = new Vector3(randomX, randomY, 0);
+
+            // Randomly select one of the player items to spawn
+            int randomItem = Random.Range(0, 2); // Generates a random number between 0 and 2
+            switch (randomItem)
+            {
+                case 0:
+                    Instantiate(lifeItemPrefab, spawnPosition, Quaternion.identity);
+                    break;
+                case 1:
+                    Instantiate(shieldItemPrefab, spawnPosition, Quaternion.identity);
+                    break;
+                case 2:
+                    break; // No item spawned
+            }
+        }
+    }
     public void AddScore(int scoreToAdd)
     {
         score += scoreToAdd;
@@ -86,4 +117,13 @@ void createScorePickUp()
     {
         LivesText.text = "" + lives.ToString();
     }
+    
+    public void GameOver()
+    {
+        gameOverText.SetActive(true);
+        restartText.SetActive(true);
+        gameOver = true;
+        Time.timeScale = 0f;
+    }
+    
 }

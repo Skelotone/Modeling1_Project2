@@ -35,12 +35,13 @@ private void OnTriggerEnter2D(Collider2D whatdidihit)
         if (whatdidihit.tag == "Player")
         {
             whatdidihit.GetComponent<Player>().LooseALife();
-            Destroy(this.gameObject);
+            Destroy(this.gameObject); 
+
         }
         if (whatdidihit.tag == "Bullet")
         {
             Destroy(whatdidihit.gameObject);
-            Destroy(this.gameObject);
+            Destroy(this.gameObject); 
             GameManager.instance.AddScore(10);
         }
     }
